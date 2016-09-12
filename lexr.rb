@@ -49,6 +49,15 @@ class DefinitionError < LexerError
 end
 
 
+def warning(msg)
+  STDERR.puts(msg)
+end
+
+def fail(msg, code = 1)
+  warning(msg)
+  exit(code)
+end
+
 ##
 # Lexer class - functions similar to the GNU 'flex' tool, except instead of generating
 #               the code for a new lexical analyzer, it simply acts as the lexer itself.
@@ -72,14 +81,24 @@ class Lexer
     @states = [:initial]
     @definitions = {}
     @state_rules = {}
-    # put option variables here
+
+    @verbose = false
     yield self if block_given?
+  end
+
+  def verbose
+    verbose = true
+  end
+
+  def noverbose
+    verbose = false
   end
 
   def set(opt)
     opt = opt.to_sym
     if @options[opt]
       @options[opt] = true
+      puts("Option set: #{opt}") if @verbose
     else
       raise LexerOptionError.new(option = opt)
     end
@@ -100,6 +119,9 @@ class Lexer
       @exclusive_states.delete state if @exclusive_states.include?(state)
       @open_states << state
       @states << state
+      puts("Defined open state: #{state}") if @verbose
+    else
+      warning("Open state #{state} is already defined.")
     end
   end
 
@@ -109,12 +131,16 @@ class Lexer
       @open_states.delete state if @open_states.include?(state)
       @exclusive_states << state
       @states << state
+      puts("Defined exclusive state: #{state}") if @verbose
+    else
+      warning("Exclusive state #{state} is already defined.")
     end
   end
 
   def define(name, value)
     if !@definitions[name]
       @definitions[name] = value
+      puts("#{name} defined: #{value}") if @verbose
     else
       raise DefinitionError.new("Definition '#{name}' already defined")
     end
@@ -131,6 +157,7 @@ class Lexer
         @state_rules[s] = { reg_string => action }
       end
     end
+    puts("Rule '#{regex}' defined") if @verbose
   end
 
   def parse_rule(rule)
@@ -155,7 +182,7 @@ class Lexer
   end
 
 
-#  def lex(args*)
-#    args.each_with_index
-#  end
+  def lex(args*)
+    
+  end
 end

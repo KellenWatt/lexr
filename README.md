@@ -1,5 +1,5 @@
 # lexr
-##A lexer pseudo-generator in in Ruby.
+###A lexer pseudo-generator in in Ruby.
 
 This is a library to define a lexical analyzer for any given language.
 

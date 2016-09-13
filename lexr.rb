@@ -1,6 +1,8 @@
 #!/usr/local/bin/ruby
 #depends errors.rb
 
+require_relative "errors"
+
 ##
 # Lexer class - functions similar to the GNU 'flex' tool, except instead of generating
 #               the code for a new lexical analyzer, it simply acts as the lexer itself.
@@ -55,7 +57,6 @@ class Lexer
     end
   end
 
-  #TODO: Maybe put a warning when state declared multiple times
   def open_state(state)
     state = state.to_sym 
     if !@open_states.include?(state)
@@ -103,6 +104,12 @@ class Lexer
     puts("Rule '#{regex}' defined") if @verbose
   end
 
+  def defaultrule(&action)
+    @open_states.each do |o|
+      @state_rules[o][".\n"] = action
+    end
+  end
+
   def parse_rule(rule)
     states = nil
     rule = rule.source if rule.is_a? Regexp
@@ -124,8 +131,11 @@ class Lexer
     return states, rule
   end
 
-
-  def lex(args*)
-    
+  def lex(*args)
+    args.each do |src|
+      if src.is_a? File
+        
+      end
+    end
   end
 end

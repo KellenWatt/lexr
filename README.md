@@ -1,9 +1,9 @@
 # lexr
-###A lexer pseudo-generator in in Ruby.
+###A lexer pseudo-generator in Ruby.
 
-This is a library to define a lexical analyzer for any given language.
+Lexr is a Ruby library to define a lexical analyzer for any given language.
 
-The syntax of this library is similar to GNU flex. However, it does not use, nor require 
+The syntax defined for lexr is similar to GNU flex. However, it does not use, nor require 
 flex to be installed on the system. 
 
 There are several notable excpetions to the similarity, namely that the regular expression 

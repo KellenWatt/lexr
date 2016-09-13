@@ -53,7 +53,7 @@ def warning(msg)
   STDERR.puts(msg)
 end
 
-def fail(msg, code = 1)
+def error(msg, code = 1)
   warning(msg)
   exit(code)
 end

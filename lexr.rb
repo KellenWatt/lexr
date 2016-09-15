@@ -20,7 +20,7 @@ require_relative "errors"
 class Lexer
   def initialize
     @options = {} # put options here
-    @values = {}
+    @values = {:lineno, :text, :len, :in, :out}
     @open_states = [:initial]
     @exclusive_states = []
     @states = [:initial]

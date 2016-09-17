@@ -14,8 +14,8 @@ require_relative "errors"
 #
 #               It's worth noting that the rules are defined to eventually use Ruby's 
 #               built-in Regexp type. Flex uses actual regular expressions. Please use
-#               those, instead of things like lookahead. Theoretically, you can, but 
-#               just... don't.
+#               those, instead of things like lookahead. Theoretically, you can use those
+#               features, but just... don't. Please.
 ##
 class Lexer
   def initialize
@@ -30,10 +30,13 @@ class Lexer
     @states = [:initial]
     @definitions = {}
     @state_rules = {}
+    @tokens = {}
 
     @verbose = false
     yield self if block_given?
   end
+
+  attr_accessor :tokens
 
   def verbose
     verbose = true
@@ -133,6 +136,10 @@ class Lexer
     end
     
     return states, rule
+  end
+
+  def token(name)
+    @tokens << name.to_s.to_sym
   end
 
   def lex(*args)

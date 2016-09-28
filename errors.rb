@@ -15,9 +15,9 @@ end
 ##
 class LexerOptionError < LexerError
   def initialize(msg = "Lexer option does not exist", option = nil)
-    super(msg)
     @option = option if option
     msg = "Lexer option ##{option} does not exist" if option
+    super(msg)
   end
 end
 
@@ -26,28 +26,35 @@ end
 ##
 class LexerValueError < LexerError
   def initialize(msg = "Lexer value does not exist", value = nil)
-    super(msg)
     @val = value if value
     msg = "Lexer value ##{value} does not exist" if value
+    super(msg)
   end
 end
 
 class StateError < LexerError
   def initialize(msg = "Lexer state not defined", state = nil)
-    super(msg)
     @state = state if state
     msg = "Lexer state #{state} does not exist" if state
+    super(msg)
   end
 end
 
 class DefinitionError < LexerError
   def initialize(msg = "Lexer definition not defined", definition = nil)
-    super(msg)
     @definition = definition if definition
     msg = "Lexer definition '#{defintion}' does not exist" if definition
+    super(msg)
   end
 end
 
+class SourceError < LexerError
+  def initalize(msg = "Invalid source provided", source = nil)
+    @source = source
+    msg = "#{source} is not a valid text source" if source
+    msg << "\nSource must respond to :eof? and :getc"
+    super(msg)
+  end
 
 def warning(msg)
   STDERR.puts(msg)

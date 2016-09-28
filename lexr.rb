@@ -2,6 +2,7 @@
 #depends errors.rb
 
 require_relative "errors"
+require "stringio"
 
 ##
 # Lexer class - functions similar to the GNU 'flex' tool, except instead of generating
@@ -31,6 +32,7 @@ class Lexer
     @definitions = {}
     @state_rules = {}
     @tokens = {}
+    @sources = []
 
     @verbose = false
     yield self if block_given?
@@ -142,11 +144,22 @@ class Lexer
     @tokens << name.to_s.to_sym
   end
 
-  def lex(*args)
-    args.each do |src|
-      if src.is_a? File
-        
+  def add_source(src)
+    if src.respond_to?(:getc) && src.respond_to?(:eof)
+      if src.is_a? String
+        if File.exist? src
+          src = File.new(src)
+        else
+          src = StringIO.new(src)
+        end
       end
+      @sources << src
+    else
+      raise SourceError.new(source = src)
     end
+  end
+
+  def lex()
+    
   end
 end

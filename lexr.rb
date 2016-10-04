@@ -5,7 +5,7 @@ require_relative "errors"
 require "stringio"
 
 ##
-# Lexer class - functions similar to the GNU 'flex' tool, except instead of generating
+# Lexer class - functions similarily to the GNU 'flex' tool, except instead of generating
 #               the code for a new lexical analyzer, it simply acts as the lexer itself.
 #               It is strictly a lexer, not a generator. However it would likely be
 #               trivial to create one based upon this code, or by opening the class.
@@ -15,8 +15,8 @@ require "stringio"
 #
 #               It's worth noting that the rules are defined to eventually use Ruby's 
 #               built-in Regexp type. Flex uses actual regular expressions. Please use
-#               those, instead of things like lookahead. Theoretically, you can use those
-#               features, but just... don't. Please.
+#               those guidelines, instead of things like lookahead. Theoretically, you 
+#               should be able to use those features, but just... don't. Please.
 ##
 class Lexer
   def initialize
@@ -32,22 +32,15 @@ class Lexer
     @definitions = {}
     @state_rules = {}
     @tokens = {}
-    @sources = []
+    @sources = nil
 
     @verbose = false
     yield self if block_given?
   end
 
   attr_accessor :tokens
-
-  def verbose
-    verbose = true
-  end
-
-  def noverbose
-    verbose = false
-  end
-
+  attr_writer :verbose
+  
   def set(opt)
     opt = opt.to_sym
     if @options[opt]
@@ -80,7 +73,7 @@ class Lexer
 
   def exclusive_state(state)
     state = state.to_sym
-    if !@exclusive_States.include(state)
+    if !@exclusive_states.include(state)
       @open_states.delete state if @open_states.include?(state)
       @exclusive_states << state
       @states << state
@@ -99,6 +92,10 @@ class Lexer
     end
   end
 
+  ##
+  # action must be a proc, not a lambda. A lambda will be accepted, however it
+  # will lead to unexpected behaviour, as an returns will not quit lex().
+  ##
   def rule(regex, &action)
     states, reg_string = parse_rule(regex)
     states.each do |s|
@@ -113,6 +110,10 @@ class Lexer
     puts("Rule '#{regex}' defined") if @verbose
   end
 
+  ##
+  # action must be a proc, not a lambda. A lambda will be accepted, however it
+  # will lead to unexpected behaviour, as an returns will not quit lex().
+  ##
   def defaultrule(&action)
     @open_states.each do |o|
       @state_rules[o][".\n"] = action
@@ -141,10 +142,19 @@ class Lexer
   end
 
   def token(name)
-    @tokens << name.to_s.to_sym
+    name = name.to_s.to_sym if !token.is_a? Symbol
+    @tokens << name
   end
 
-  def add_source(src)
+  ##
+  # As a side-effect of design, calling source() anywhere will necessarily cause
+  # the lexer to start from the beginning of the new file. As a consequence, any
+  # files that must be lexed in the middle of a file must be included in the file 
+  # or stream associated with the include, as changing files from and to the 
+  # original will cause it to restart lexing (potentially creating an infinitely 
+  # recursive problem)
+  ##
+  def source(src)
     if src.respond_to?(:getc) && src.respond_to?(:eof)
       if src.is_a? String
         if File.exist? src
@@ -153,7 +163,7 @@ class Lexer
           src = StringIO.new(src)
         end
       end
-      @sources << src
+      @source << src
     else
       raise SourceError.new(source = src)
     end

@@ -16,23 +16,23 @@ require "stringio"
 #               It's worth noting that the rules are defined to eventually use Ruby's 
 #               built-in Regexp type. Flex uses actual regular expressions. Please use
 #               those guidelines, instead of things like lookahead. Theoretically, you 
-#               should be able to use those features, but just... don't. Please.
+#               should be able to use those features, but just... don't... please.
 ##
 class Lexer
   def initialize
     @options = {} # put options here
-    @values = {lineno: nil, 
-               text: nil, 
-               len: nil, 
-               in: nil, 
-               out: nil}
+    @lexr = {lineno: nil, 
+             text:   nil, 
+             in:     nil}
     @open_states = [:initial]
     @exclusive_states = []
     @states = [:initial]
     @definitions = {}
-    @state_rules = {}
+    @state_rules = Hash.new do |hash, key|
+      hash[key] = Hash.new
+    end
     @tokens = {}
-    @sources = nil
+    @source = nil
 
     @verbose = false
     yield self if block_given?
@@ -52,8 +52,8 @@ class Lexer
   end
 
   def [](val)
-    if @values[val]
-      @values[val]
+    if @lexr[val]
+      @lexr[val]
     else
       raise LexerValueError.new(value = val)
     end
@@ -155,21 +155,27 @@ class Lexer
   # recursive problem)
   ##
   def source(src)
-    if src.respond_to?(:getc) && src.respond_to?(:eof)
+    if src.respond_to?(:getc)
       if src.is_a? String
         if File.exist? src
           src = File.new(src)
+          @lexr[:in] = src
         else
           src = StringIO.new(src)
+          @lexr[:in] = nil
         end
       end
-      @source << src
+      @source = src
     else
       raise SourceError.new(source = src)
     end
   end
 
   def lex()
-    
+    state = :initial
+    while c = @source.getc
+      @lexr[:text] << c
+      rules = 
+    end
   end
 end

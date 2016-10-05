@@ -23,7 +23,8 @@ class Lexer
     @options = {} # put options here
     @lexr = {lineno: nil, 
              text:   nil, 
-             in:     nil}
+             in:     nil,
+             state:  :initial}
     @open_states = [:initial]
     @exclusive_states = []
     @states = [:initial]
@@ -61,8 +62,8 @@ class Lexer
 
   def open_state(state)
     state = state.to_sym 
-    if !@open_states.include?(state)
-      @exclusive_states.delete state if @exclusive_states.include?(state)
+    unless @open_states.include?(state)
+      @exclusive_states.delete(state) if @exclusive_states.include?(state)
       @open_states << state
       @states << state
       puts("Defined open state: #{state}") if @verbose
@@ -73,8 +74,8 @@ class Lexer
 
   def exclusive_state(state)
     state = state.to_sym
-    if !@exclusive_states.include(state)
-      @open_states.delete state if @open_states.include?(state)
+    unless @exclusive_states.include(state)
+      @open_states.delete(state) if @open_states.include?(state)
       @exclusive_states << state
       @states << state
       puts("Defined exclusive state: #{state}") if @verbose
@@ -84,7 +85,7 @@ class Lexer
   end
 
   def define(name, value)
-    if !@definitions[name]
+    unless @definitions[name]
       @definitions[name] = value
       puts("#{name} defined: #{value}") if @verbose
     else
@@ -122,12 +123,12 @@ class Lexer
 
   def parse_rule(rule)
     states = nil
-    rule = rule.source if rule.is_a? Regexp
-    if match = rule.match(/(?<=^<).+(?=>)/)
+    rule = rule.source if rule.is_a?(Regexp)
+    if (match = rule.match(/(?<=^<).+(?=>)/))
       state_names = match.to_s
       rule.gsub!(/<#{state_names}>/, "")
       states = state_names.split(",").map do |s|
-        if !@states.include?(s.to_sym)
+        unless @states.include?(s.to_sym)
           raise StateError.new(state = s)
         end
         s.to_sym
@@ -157,7 +158,7 @@ class Lexer
   def source(src)
     if src.respond_to?(:getc)
       if src.is_a? String
-        if File.exist? src
+        if File.exist?(src)
           src = File.new(src)
           @lexr[:in] = src
         else
@@ -172,10 +173,10 @@ class Lexer
   end
 
   def lex()
-    state = :initial
-    while c = @source.getc
+    while (c = @source.getc)
       @lexr[:text] << c
-      rules = 
+      rules = @state_rules[@lexr[:state]]
+
     end
   end
 end

@@ -123,10 +123,10 @@ class Lexer
 
   def parse_rule(rule)
     states = nil
-    rule = rule.source if rule.is_a?(Regexp)
-    if (match = rule.match(/(?<=^<).+(?=>)/))
+    rule_s = rule.source if rule.is_a?(Regexp)
+    if (match = rule_s.match(/(?<=^<).+(?=>)/))
       state_names = match.to_s
-      rule.gsub!(/<#{state_names}>/, "")
+      rule_s.gsub!(/<#{state_names}>/, "")
       states = state_names.split(",").map do |s|
         unless @states.include?(s.to_sym)
           raise StateError.new(state = s)
@@ -143,8 +143,8 @@ class Lexer
   end
 
   def token(name)
-    name = name.to_s.to_sym if !token.is_a? Symbol
-    @tokens << name
+    token_name = name.to_s.to_sym if !name.is_a? Symbol
+    @tokens << token_name
   end
 
   ##
@@ -159,16 +159,16 @@ class Lexer
     if src.respond_to?(:getc)
       if src.is_a? String
         if File.exist?(src)
-          src = File.new(src)
+          sourc = File.new(src)
           @lexr[:in] = src
         else
-          src = StringIO.new(src)
+          sourc = StringIO.new(src)
           @lexr[:in] = nil
         end
       end
-      @source = src
+      @source = sourc
     else
-      raise SourceError.new(source = src)
+      raise SourceError.new(source = sourc)
     end
   end
 
@@ -176,7 +176,7 @@ class Lexer
     while (c = @source.getc)
       @lexr[:text] << c
       rules = @state_rules[@lexr[:state]]
-
+      
     end
   end
 end
